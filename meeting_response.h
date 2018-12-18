@@ -1,6 +1,7 @@
 //Filename: meeting_response.h
 
 //Name:     Meera Murali
+//Email:    mmurali@pdx.edu
 //Class:    202
 //Program:  3
 //Date:     08/07/2017
@@ -90,7 +91,7 @@ class meeting: public group_contacts
         meeting(char * a_meeting_name, char * a_location, char * a_day_time, char * a_keyword);
         meeting(char * a_meeting_name, char * a_location, char * a_day_time, char * a_keyword, const group_contacts & a_grp);
         meeting(const meeting & to_copy);
-        virtual ~meeting();
+        ~meeting();
 
         int display(void) const;
         int copy_meeting(const meeting & to_copy);
@@ -115,3 +116,32 @@ class meeting: public group_contacts
         char * day_time;
         char * keyword;
 };
+
+class response: public contact
+{
+    public:
+        response();
+        response(const contact & to_copy, int an_intent, char * a_comment);
+        response(const response & to_copy);
+        ~response();    
+
+        int display(void) const;
+        int check_intent(char * an_intent) const;
+
+    protected:
+        int intent;     //0:No, 1:Maybe, 2:Yes, -1:default
+        char * comment;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+

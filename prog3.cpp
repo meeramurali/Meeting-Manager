@@ -1,6 +1,7 @@
 //Filename: prog3.cpp
 
 //Name:     Meera Murali
+//Email:    mmurali@pdx.edu
 //Class:    202
 //Program:  3
 //Date:     08/07/2017
@@ -63,6 +64,7 @@ int main()
     char d_t[] = "2017/08/01, 5:00 pm";
     char key[] = "parTY";
     char key2[] = "Party";
+    char comm[] = "Cant wait!!";
     meeting my_meet(meet, loc, d_t, key, grp3);
     meeting a_meet(meet, loc, d_t, key);
     
@@ -86,6 +88,11 @@ int main()
 
     if (key2 <= meet3)
         cout << "lesser than equal to" << endl;
+
+    response res1(A, 2, comm);
+    response res2(res1);
+    if (!res2.display())
+        cout << "unable to display response" << endl; 
     
 
 /*

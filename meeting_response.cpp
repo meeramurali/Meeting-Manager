@@ -1,6 +1,7 @@
 //Filename: meeting_response.cpp
 
 //Name:     Meera Murali
+//Email:    mmurali@pdx.edu
 //Class:    202
 //Program:  3
 //Date:     08/07/2017
@@ -137,7 +138,7 @@ int contact::display(void) const
         return 0;
 
     //Display name and email id
-    cout << "\t" << name << " | " << email << endl;
+    cout << "\t" << name << " | " << email;
    
     return 1; 
 }
@@ -450,7 +451,10 @@ int group_contacts::display(contact_node * head) const
 
     //display current node
     if (head->display())
+    {
+        cout << endl;
         ++displayed;
+    }
 
     //recursive call to display next node
     displayed += display(head->go_next());
@@ -1005,4 +1009,121 @@ bool operator >= (char * key, const meeting & a_meet)
     else 
         return false;
 }
+
+
+
+//Default constructor
+//INPUT: no arguments
+//OUTPUT: no return value
+response::response(): intent(-1), comment(NULL) {}
+
+
+
+//Constructor with arguments
+//OUTPUT: no return value
+response::response(const contact & to_copy, int an_intent, char * a_comment): contact(to_copy)
+{
+    if (an_intent >= 0 && an_intent <=2)
+        intent = an_intent;
+    else
+        intent = -1;
+
+    if (a_comment)
+    {
+        comment = new char[strlen(a_comment) + 1];
+        strcpy(comment, a_comment);
+    }
+    else
+        comment = NULL;
+}
+
+
+
+//Copy constructor
+//INPUT: 1 argument: a response object to copy
+//OUTPUT: no return value
+response::response(const response & to_copy): contact(to_copy)
+{
+    //Copy intent
+    if (to_copy.intent >= 0 && to_copy.intent <=2)
+        intent = to_copy.intent;
+    else
+        intent = -1;
+
+    //Copy comment
+    if (to_copy.comment)
+    {
+        comment = new char[strlen(to_copy.comment) + 1];
+        strcpy(comment, to_copy.comment);
+    }
+    else
+        comment = NULL;
+}
+
+
+
+//Destructor - releases all dynamic memory
+//INPUT: no arguments
+//OUTPUT: no return value
+response::~response()
+{
+    intent = -1;
+    if (comment)
+    {
+        delete [] comment;
+        comment = NULL;
+    }
+}
+
+
+
+//Displays response
+int response::display(void) const
+{
+    int result = 0;
+
+    //Display contact
+    if (contact::display())
+    {
+        //Display intent
+        cout << ":\t";
+
+        if (intent == 0)
+            cout << "No";
+
+        else if (intent == 1)
+            cout << "Maybe";
+
+        else if (intent == 2)
+            cout << "Yes";
+
+        else
+            cout << "-";
+           
+        //Display comment if any 
+        if (comment)
+            cout << "\t" << comment << endl;
+    
+        result = 1;
+    }
+    
+    return result;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
