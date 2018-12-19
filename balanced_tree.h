@@ -55,6 +55,8 @@ class rb_node
         bool is_red(void) const;
         bool is_lesser(const meeting & to_compare) const;
         bool is_equal(const meeting & to_compare) const;
+        bool is_lesser(char * to_compare) const;
+        bool is_equal(char * to_compare) const;
         int display(void) const;
         int set_color(int new_color);
         int get_color(void) const;
@@ -81,15 +83,18 @@ class rb_tree
         rb_tree();
         ~rb_tree();
 
+        int load_file(const char filename[]);
         int height(rb_node * root) const;
         int insert(const meeting & to_add);
         int display_inorder(void) const;
         int display_levels(void) const;
-//        int display_by_keyword(char * a_key) const;
+        int display_by_keyword(char * a_key) const;
+//        rb_node& operator [] (char * a_key);
 
     private:
         rb_node * root;
-       
+
+        int extract_participants(char * all_participants, grp_part & a_grp);
         int remove_all(rb_node *& root);
         int BST_insert(rb_node *& root, const meeting_node & to_add, rb_node *& node_added, int & timer);
         int convert_rb_tree(rb_node *& root, rb_node *& a_node);
@@ -98,4 +103,5 @@ class rb_tree
         int swap_color(rb_node *& node1, rb_node *& node2);
         int display_inorder(rb_node * root) const;
         int display_lvl(rb_node * root, int lvl) const;
+        int display_by_key(rb_node * root, char * a_key) const;
 };

@@ -434,7 +434,7 @@ int participant::display(void) const
         }
 
         else
-            cout << "\t| No response yet" << endl;
+            cout << "\t| No response yet";
     
         result = 1;
     }

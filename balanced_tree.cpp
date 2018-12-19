@@ -258,6 +258,44 @@ bool rb_node::is_equal(const meeting & to_compare) const
 
 
 
+//Checks if key data member is lesser alphabetically 
+//than argument keyword
+//INPUT: 1 argument: a meeting object to compare
+//OUTPUT: bool return type (true: node key is lesser, false: otherwise)
+bool rb_node::is_lesser(char * to_compare) const
+{
+    bool result = false;            //value to return 
+
+    if(to_compare)
+    {
+        //compare with key data member
+        if(strcmp(key, to_compare) < 0)
+            result = true;
+    }
+
+    return result;
+}
+
+
+
+//Checks if key data member is equal to argument keyword
+//INPUT: 1 argument: a meeting object to compare
+//OUTPUT: bool return type (true: keywords match, false: otherwise)
+bool rb_node::is_equal(char * to_compare) const
+{
+    bool result = false;
+
+    if(to_compare)
+    {
+        if(strcmp(key, to_compare) == 0)
+            result = true;
+    }
+
+    return result;
+}
+
+
+
 //Displays keyword and all meetings in list
 //INPUT: no arguments
 //OUTPUT: int return type (number of meetings in list)
@@ -272,7 +310,8 @@ int rb_node::display(void) const
         cout << "(B) ";
 
     //Display keyword
-    cout << "KEYWORD: " << key;
+    cout << "KEYWORD: " << key << endl;
+    cout << "***********************************************************************************************" << endl;
 
     //Display all meetings in list
     num_meetings = display_all(head);
@@ -283,6 +322,7 @@ int rb_node::display(void) const
     else
         cout << "*** " << num_meetings << " meetings found ***" << endl;
 
+    cout << "***********************************************************************************************" << endl;
     return num_meetings;
 }
 
@@ -300,7 +340,6 @@ int rb_node::display_all(meeting_node * head) const
         return 0;
 
     //display current node
-    cout << "\t";
     if (head->display())
         ++displayed;
  
@@ -429,6 +468,8 @@ int rb_tree::insert(const meeting & to_add)
     //perform a BST insert first
     if (BST_insert(root, to_add, node_added, timer))
     {
+        ++success;
+
         if (node_added)
         {
             //fix violations for red-black tree
@@ -711,6 +752,7 @@ int rb_tree::display_inorder(rb_node * root) const
     displayed += display_inorder(root->go_left());
 
     //display current node
+    cout << endl;
     root->display();
     cout << endl;
     ++displayed;
@@ -783,4 +825,316 @@ int rb_tree::display_lvl(rb_node * root, int lvl) const
     }
 
     return displayed;
+}
+
+
+
+//Displays all meetings that match argument key
+//INPUT: keyword to match
+//OUTPUT: number of meetings found for keyword
+int rb_tree::display_by_keyword(char * a_key) const
+{
+    char * a_key_lower = NULL; //to convert to lowercase
+    int a_key_len = 0;     //length of argument word
+    int displayed = 0;     //number of meetings found
+
+    if (!a_key)
+        return 0;
+
+    //convert to lowercase
+    a_key_len = strlen(a_key);
+    a_key_lower = new char[a_key_len + 1];
+    strcpy(a_key_lower, a_key);
+    for (int i = 0; i < a_key_len; ++i)
+        a_key_lower[i] = tolower(a_key[i]); 
+
+    //display all meetings for the keyword
+    displayed = display_by_key(root, a_key);
+
+    //delete temporary variable
+    if (a_key_lower)
+    {
+        delete [] a_key_lower;
+        a_key_lower = NULL;
+    }
+
+    return displayed;
+}
+
+
+
+//Displays all meetings that match argument key
+//INPUT: keyword to match
+//OUTPUT: number of meetings found for keyword
+int rb_tree::display_by_key(rb_node * root, char * a_key) const
+{
+    int displayed = 0;  //Number of meetings found
+
+    //base case
+    if(!root)
+        return 0; 
+
+    //If current node matches key, display all meetings 
+    //in node
+    if (root->is_equal(a_key))
+        displayed = root->display();
+
+    //If current key is lesser, traverse right subtree
+    //to insert
+    else if (root->is_lesser(a_key))
+        displayed = display_by_key(root->go_right(), a_key);
+
+    //If current key is greater, traverse left subtree
+    //to insert
+    else
+        displayed = display_by_key(root->go_left(), a_key);
+
+    return displayed;
+}
+
+
+
+//Loads calendar from file
+//INPUT: 1 argument: filename to load from
+//OUTPUT: return type: int (number of meetings loaded) 
+int rb_tree::load_file(const char filename[])
+{
+    meeting * new_meeting = NULL;  //Temporary pointer to read each meeting in file
+    char all_participants[801];    //Temporary variable to read in participants info
+    char meeting_name[101];        //Temporary variable to read in meeting name
+    char meeting_loc[101];         //Temporary variable to read in meeting location
+    char meeting_date_time[101];   //Temporary variable to read in meeting date and time
+    char meeting_key[101];         //Temporary variable to read in meeting keyword
+    int meetings_added = 0;        //Value to return
+    grp_part * meeting_grp = NULL;
+    ifstream in_file;              //File variable for input
+  
+    //Connect to particular file
+    in_file.open(filename);
+
+    //If unable to find file
+    if (!in_file)
+        return 0;
+
+    //If connected...
+    else
+    {
+        //Attempt to read first piece of data
+        in_file.get(all_participants, 801, '|');
+        in_file.ignore(1000, '|');
+
+        cout << "Participants string: ";
+        cout << all_participants << endl << endl;
+
+        //Repeat until end of file or not connected to file
+        while (in_file && !in_file.eof())
+        {
+            //Read in meeting name...
+            in_file.get(meeting_name, 101, '|');
+            in_file.ignore(1000, '|');
+
+            in_file.get(meeting_loc, 101, '|');
+            in_file.ignore(1000, '|');
+
+            in_file.get(meeting_date_time, 101, '|');
+            in_file.ignore(1000, '|');
+
+            in_file.get(meeting_key, 101, '\n');
+            in_file.ignore(1000, '\n');
+
+            //Extract individual participants and create a grp_part object
+            meeting_grp = new grp_part;
+            if (extract_participants (all_participants, *meeting_grp))
+            {
+                //dipslay grp
+                cout << "\nGroup created: " << endl;
+                meeting_grp->display();
+
+                //create new meeting with read in details
+                new_meeting = new meeting(meeting_name, meeting_loc, meeting_date_time, meeting_key, *meeting_grp);
+                
+                cout << "\nMeeting created: " << endl;
+                new_meeting->display();
+
+                //Add meeting into tree
+                if (insert(* new_meeting))
+                    //Increment number of meetings loaded
+                    ++meetings_added;
+            }
+
+            //Reset temporary variables
+            delete new_meeting;
+            new_meeting = NULL;
+            delete meeting_grp;
+            meeting_grp = NULL;
+
+            //Prime the pump for next read in
+            in_file.get(all_participants, 801, '|');
+            in_file.ignore(1000, '|');
+        
+            cout << "Participants string: ";
+            cout << all_participants << endl << endl;
+        }
+        
+        //Close file and clear file variable
+        in_file.close();
+        in_file.clear();
+    }
+    
+    return meetings_added;
+}
+
+
+
+//Extracts participants info and builds a group of participants
+//INPUT: 2 arguments: char array to extract participants info from, grp_part pointer
+//OUTPUT: return type: int (number of participants extracted) 
+int rb_tree::extract_participants(char * all_participants, grp_part & a_grp)
+{
+    participant * new_participant = NULL;    //Temporary pointer to add each participant 
+    contact * new_contact = NULL;
+    char participant_name[100];         //Extracted participant name
+    char participant_email[100];         //Extracted participant email
+    int participant_intent = -1;
+    char participant_comment[500];
+    char * dest = participant_name;     //to traverse extracted participant name
+    int size = 0;           //Length of all_participants array
+    int index = 0;          //Loop variable -  array index
+    int num_participants = 0;      //Number of participants extracted
+    int timer = 0;          //To extract planet type at beginning of each name
+  
+    //Flag failure if null arguments 
+    if (!all_participants)
+        return 0;
+
+    //Find length of all participants array
+    size = strlen(all_participants);
+
+    //Traverse each character of array 
+    while (index <= size)
+    {
+        //Copy character into participant name if not [ or terminating null
+        if (timer == 0 &&
+            all_participants[index] != '[')
+        {
+            * dest = all_participants[index];
+            cout << all_participants[index];
+            ++dest;
+            ++index;
+        }
+
+        //If '[' - end of name
+        else if (timer == 0 && all_participants[index] == '[')
+        {
+            //terminate word with null character
+            * dest = '\0';
+            cout << all_participants[index] << endl;
+
+            //Increment index
+            ++index;
+
+            //Set timer to 1: to read email id next
+            timer = 1;        
+            dest = participant_email;
+        }
+            
+        else if (timer == 1 &&
+                 all_participants[index] != '^')
+        {
+            * dest = all_participants[index];
+            cout << all_participants[index] << endl;
+            ++dest;
+            ++index;
+        }
+
+        //If '^' - end of email
+        else if (timer ==1 && all_participants[index] == '^')
+        {
+            //terminate word with null character
+            * dest = '\0';
+            cout << all_participants[index] << endl;
+
+            //Increment index
+            ++index;
+
+            //Set timer to 2: to read intent next
+            timer = 2;        
+
+            dest = participant_comment;
+        }
+
+        else if (timer == 2 &&
+                 all_participants[index] != ';' &&
+                 all_participants[index] != '\0')
+        {
+            cout << all_participants[index] << endl;
+            if (all_participants[index] == '0')
+                participant_intent = 0;
+
+            else if (all_participants[index] == '1')
+                participant_intent = 1;
+
+            else if (all_participants[index] == '2')
+                participant_intent = 2;
+
+            else
+            {
+                participant_intent = -1;
+                ++index;
+            }
+            
+            ++index;
+            timer = 3;
+        }
+
+        else if (timer == 3 && 
+                 all_participants[index] != ';' &&
+                 all_participants[index] != '\0')
+        {
+            * dest = all_participants[index];
+            cout << all_participants[index] << endl;
+            ++dest;
+            ++index;
+        }
+
+        else if (all_participants[index] == ';' ||
+                 all_participants[index] == '\0')
+        {
+            //terminate word with null character
+            cout << all_participants[index];
+            * dest = '\0';
+            ++index;
+            timer = 4;
+        }
+
+        if (timer == 4)
+        {
+            //Create a new contact 
+            new_contact = new contact(participant_name, participant_email);
+            cout << "Contact created: " << endl;
+            new_contact->display();
+            cout << endl;
+           
+            //Create a new participant
+            cout << "Participant created: " << endl;
+            new_participant = new participant(*new_contact, participant_intent, participant_comment);
+            cout << endl;
+
+            //Add participant to group
+            if (a_grp.add(*new_participant))
+                ++num_participants;
+
+            //Reset participant name and timer
+            dest = participant_name;
+            timer = 0;
+
+            //Reset temporary variables
+            delete new_participant;
+            new_participant = NULL;
+            delete new_contact;
+            new_contact = NULL;
+        }
+    }
+    
+    return num_participants;
 }
