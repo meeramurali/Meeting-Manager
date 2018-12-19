@@ -476,6 +476,42 @@ int rb_node::find_meeting_by_position(meeting_node * head, meeting_node *& found
 
 
 
+int rb_node::write_file_append(const char filename[]) const
+{
+    ofstream out_file;          //File variable for output
+    int success = 0;            //Value to return
+    meeting_node * current = head;
+
+    //Open file to write at beginning of file
+    //(overwrites all content)
+    out_file.open(filename, ios::app);
+
+    //If connected
+    if (out_file)
+    {
+        if (head)
+        {
+            //Write to file with delimiter
+            while (current)
+            {
+                current->write_file_append(filename);
+                current = current->go_next();                    
+            }
+
+            //Flag success
+            success = 1;
+        }
+
+        //Close file and clear file variable
+        out_file.close();
+        out_file.clear();
+    }
+
+    return success;
+}
+
+
+
 //Default constructor
 //INPUT: no arguments
 //OUTPUT: no return value
@@ -492,6 +528,73 @@ rb_tree::~rb_tree()
         root = NULL;
 }
 
+
+
+//Writes data to specified external data file - wrapper function
+//INPUT: 1 argument: filename (char array)
+//OUTPUT: return type: int (number of meetings written)
+int rb_tree::write_file(const char filename[]) const
+{
+    ofstream out_file;      //File variable for output
+    int written = 0;        //Number of events written
+
+    //Empty tree
+    if (!root)
+        return 0;
+
+    //Open file to write at beginning of file
+    //(overwrites all content)
+    out_file.open(filename);
+
+    //If connected
+    if (out_file)
+    {
+        //Write data pre-order
+        written += write_file(root, filename);
+        
+        //Close file and clear file variable
+        out_file.close();
+        out_file.clear();
+    }
+
+    return written;
+}
+
+//Writes data to specified external data file
+//(pre-order traversal)
+//INPUT: 2 arguments: root pointer, filename (char array)
+//OUTPUT: return type: int (number of meetings written)
+int rb_tree::write_file(rb_node * root, const char filename[]) const
+{
+    ofstream out_file;      //File variable for output
+    int written = 0;        //Number of events written
+
+    //base case - root is null
+    if (!root)
+        return 0;
+
+    //Open file to append data
+    out_file.open(filename, ios::app);
+
+    //If connected
+    if (out_file)
+    {
+        //Write root's event
+        written += root->write_file_append(filename);
+
+        //traverse left subtree
+        written += write_file(root->go_left(), filename);
+
+        //traverse right subtree
+        written += write_file(root->go_right(), filename);
+
+        //Close file and clear file variable
+        out_file.close();
+        out_file.clear();
+    }
+
+    return written;
+}
 
 
 //Removes all nodes recursively

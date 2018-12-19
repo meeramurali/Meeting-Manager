@@ -138,7 +138,9 @@ int contact::display(void) const
         return 0;
 
     //Display name and email id
-    cout << "\t" << name << "\t(" << email << ")";
+    cout << left;
+    cout << "\t" << setw(20) << setfill(' ') << name 
+                 << "(" << setw(16) << setfill(' ') << email << ")" ;
    
     return 1; 
 }
@@ -279,6 +281,35 @@ bool contact::operator != (const contact & to_compare) const
 }
 
 
+int contact::write_file_append(const char filename[]) const
+{
+    ofstream out_file;          //File variable for output
+    int success = 0;            //Value to return
+
+    //Open file to write at beginning of file
+    //(overwrites all content)
+    out_file.open(filename, ios::app);
+
+    //If connected
+    if (out_file)
+    {
+        //Write to file with delimiter
+        out_file << name << "["
+                 << email << "^";
+
+        //Flag success
+        success = 1;
+
+        //Close file and clear file variable
+        out_file.close();
+        out_file.clear();
+    }
+
+    return success;
+}
+
+
+
 /*
 //Insertion (<<) operator overloading
 ostream& operator << (ostream& ouput, const contact& object)
@@ -416,25 +447,25 @@ int participant::display(void) const
     {
         if (intent != -1)
         {
-            cout << "\t| Response: ";
+            cout << setw(16) << setfill(' ') << "\t| Response: ";
             
             //Display intent
             if (intent == 0)
-                cout << "No";
+                cout << setw(6) << setfill(' ') << "No";
 
             else if (intent == 1)
-                cout << "Maybe";
+                cout << setw(6) << setfill(' ') << "Maybe";
 
             else 
-                cout << "Yes";
+                cout << setw(6) << setfill(' ') << "Yes";
                
             //Display comment if any 
             if (comment)
-                cout << "\t\t| Comment: " << comment;
+                cout << "\t| Comment: " << comment;
         }
 
         else
-            cout << "\t| No response yet";
+            cout << setw(20) << setfill(' ') <<"\t| No response yet";
     
         result = 1;
     }
@@ -507,6 +538,40 @@ participant& participant::operator = (const participant& to_copy)
     }
     
     return *this;
+}
+
+
+
+int participant::write_file_append(const char filename[]) const
+{
+    ofstream out_file;          //File variable for output
+    int success = 0;            //Value to return
+
+    //Open file to write at beginning of file
+    //(overwrites all content)
+    out_file.open(filename, ios::app);
+
+    //If connected
+    if (out_file)
+    {
+        //Write to file with delimiter
+        if (contact::write_file_append(filename))
+        {
+            out_file << intent;
+            if (comment)
+                out_file << comment;
+            out_file << ";";
+
+            //Flag success
+            success = 1;
+        }
+
+        //Close file and clear file variable
+        out_file.close();
+        out_file.clear();
+    }
+
+    return success;
 }
 
 
@@ -831,6 +896,46 @@ grp_part operator + (const participant & to_add, const grp_part & a_grp)
     if (temp.add(to_add));
 
     return temp; 
+}
+
+
+
+int grp_part::write_file_append(const char filename[]) const
+{
+    ofstream out_file;          //File variable for output
+    int success = 0;            //Value to return
+    participant_node * current = head;
+
+    //Open file to write at beginning of file
+    //(overwrites all content)
+    out_file.open(filename, ios::app);
+
+    //If connected
+    if (out_file)
+    {
+        if (head)
+        {
+            //Write to file with delimiter
+            while (current)
+            {
+                current->write_file_append(filename);
+                
+                if (current->go_next() == NULL)
+                    out_file << "|";
+                
+                current = current->go_next();                    
+            }
+
+            //Flag success
+            success = 1;
+        }
+
+        //Close file and clear file variable
+        out_file.close();
+        out_file.clear();
+    }
+
+    return success;
 }
 
 
@@ -1343,7 +1448,40 @@ bool operator >= (char * key, const meeting & a_meet)
 
 
 
+//Appends meeting details to external data file
+//INPUT: 1 argument: filename (char array)
+//OUTPUT: return type: int (0/1 - failure/success)
+int meeting::write_file_append(const char filename[]) const
+{
+    ofstream out_file;          //File variable for output
+    int success = 0;            //Value to return
 
+    //Open file to write at beginning of file
+    //(overwrites all content)
+    out_file.open(filename, ios::app);
+
+    //If connected
+    if (out_file)
+    {
+        //Write to file with delimiter
+        if (grp_part::write_file_append(filename))
+        {
+            out_file << meeting_name << "|"
+                     << location << "|"
+                     << day_time << "|"
+                     << keyword << "\n";
+
+            //Flag success
+            success = 1;
+        }
+
+        //Close file and clear file variable
+        out_file.close();
+        out_file.clear();
+    }
+
+    return success;
+}
 
 
 

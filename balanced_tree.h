@@ -63,6 +63,7 @@ class rb_node
         int get_color(void) const;
         int add_meeting(const meeting & to_add);
         int find_meeting_by_position(meeting_node *& found, int pos) const;
+        int write_file_append(char const filename[]) const;
         
     private:
         char * key;
@@ -87,6 +88,7 @@ class rb_tree
         ~rb_tree();
 
         int load_file(const char filename[]);
+        int write_file(const char filename[]) const;
         int height(rb_node * root) const;
         int insert(const meeting & to_add);
         int display_inorder(void) const;
@@ -99,6 +101,7 @@ class rb_tree
     private:
         rb_node * root;
 
+        int write_file(rb_node * root, const char filename[]) const;
         int extract_participants(char * all_participants, grp_part & a_grp);
         int remove_all(rb_node *& root);
         int BST_insert(rb_node *& root, const meeting_node & to_add, rb_node *& node_added, int & timer);

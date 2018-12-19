@@ -14,8 +14,7 @@
 #include <cctype>
 #include <cstring>
 #include <fstream>
-#include <sys/time.h>
-#include <stdlib.h>
+#include <iomanip>
 
 using namespace std;
 
@@ -39,6 +38,7 @@ class contact
         virtual bool operator != (const contact& to_compare) const;
 //        friend ostream& operator << (ostream&, const contact&);
 //        int read_contact(void);
+        int write_file_append(const char filename[]) const;
 
     protected:
         char * name;
@@ -59,6 +59,7 @@ class participant: public contact
         bool check_intent(int an_intent) const;
         int copy_participant(const participant & to_copy);
         participant& operator = (const participant& to_copy);
+        int write_file_append(const char filename[]) const;
 
     protected:
         int intent;     //0:No, 1:Maybe, 2:Yes, -1:default
@@ -97,6 +98,7 @@ class grp_part
         friend grp_part operator + (const grp_part & a_grp, const participant & to_add);
         friend grp_part operator + (const participant & to_add, const grp_part & a_grp);
 //        grp_part operator + (const grp_part & grp1, const grp_part & grp2);
+        int write_file_append(const char filename[]) const;
 
     protected:
         participant_node * head;
@@ -135,6 +137,7 @@ class meeting: public grp_part
         friend bool operator <= (char * key, const meeting & a_meet);
         friend bool operator >= (const meeting & a_meet, char * key);
         friend bool operator >= (char * key, const meeting & a_meet);
+        int write_file_append(const char filename[]) const;
 
     protected:
         char * meeting_name;
