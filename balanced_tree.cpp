@@ -327,6 +327,27 @@ int rb_node::display(void) const
 }
 
 
+
+//Displays keyword for node
+//INPUT: no arguments
+//OUTPUT: int (0/1 - failure/success)
+int rb_node::display_key(void) const
+{
+    if (!key)
+        return 0;
+    
+    //Display node color
+    if (color == RED)
+        cout << "(R) ";
+    else
+        cout << "(B) ";
+
+    cout << "'" << key << "'" << "\t";
+
+    return 1;
+}
+
+
     
 //Displays all meeting nodes recursively
 //INPUT: head pointer to list of meetings
@@ -341,7 +362,11 @@ int rb_node::display_all(meeting_node * head) const
 
     //display current node
     if (head->display())
+    {
+        cout << endl;
+        cout << "-----------------------------------------------------------------------------------------------" << endl;
         ++displayed;
+    }
  
     //recursive call
     displayed += display_all(head->go_next());
@@ -777,7 +802,7 @@ int rb_tree::height(rb_node * root) const
 
 
 //Displays all nodes each level
-int rb_tree::display_levels(void) const
+int rb_tree::display_key_bylevels(void) const
 {
     int levels = 0;
     int ht = height(root);
@@ -788,7 +813,6 @@ int rb_tree::display_levels(void) const
         cout << "\n*** Level " << i << ": ***" << endl;
         if (display_lvl(root, i))
         {
-            cout << endl;
             ++levels;
         }
     }
@@ -810,7 +834,7 @@ int rb_tree::display_lvl(rb_node * root, int lvl) const
     //If level is 1, display root
     if (lvl == 1)
     {
-        root->display();
+        root->display_key();
         cout << endl;
         ++displayed;
     }
@@ -849,7 +873,7 @@ int rb_tree::display_by_keyword(char * a_key) const
         a_key_lower[i] = tolower(a_key[i]); 
 
     //display all meetings for the keyword
-    displayed = display_by_key(root, a_key);
+    displayed = display_by_key(root, a_key_lower);
 
     //delete temporary variable
     if (a_key_lower)

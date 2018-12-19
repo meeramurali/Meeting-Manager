@@ -1039,7 +1039,7 @@ int meeting::display(void) const
 {
     int num_part = 0;   //number of participants
 
-    cout << "Name: " << meeting_name << endl;
+    cout << "Meeting name: " << meeting_name << endl;
     cout << "Location: " << location << endl;
     cout << "Day, time: " << day_time << endl;
     cout << "Keyword: " << keyword << endl;

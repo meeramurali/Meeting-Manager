@@ -58,6 +58,7 @@ class rb_node
         bool is_lesser(char * to_compare) const;
         bool is_equal(char * to_compare) const;
         int display(void) const;
+        int display_key(void) const;
         int set_color(int new_color);
         int get_color(void) const;
         int add_meeting(const meeting & to_add);
@@ -87,7 +88,7 @@ class rb_tree
         int height(rb_node * root) const;
         int insert(const meeting & to_add);
         int display_inorder(void) const;
-        int display_levels(void) const;
+        int display_key_bylevels(void) const;
         int display_by_keyword(char * a_key) const;
 //        rb_node& operator [] (char * a_key);
 
