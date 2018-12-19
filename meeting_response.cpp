@@ -1154,6 +1154,18 @@ int meeting::check_key(char * a_key) const
 
 
 
+int meeting::get_key(char *& a_key) const
+{
+    if (a_key != NULL)
+        return 0;
+
+    a_key = new char [strlen(keyword) + 1];
+    strcpy(a_key, keyword);
+    return 1;
+}
+
+
+
 //Assignment operator overloading
 meeting& meeting::operator = (const meeting & to_copy)
 {

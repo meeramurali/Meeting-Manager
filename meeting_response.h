@@ -121,6 +121,7 @@ class meeting: public grp_part
         int display(void) const;
         int copy_meeting(const meeting & to_copy);
         int check_key(char * a_key) const;
+        int get_key(char *& a_key) const;
         meeting& operator = (const meeting & to_copy);
         friend bool operator == (const meeting & a_meet, char * key);
         friend bool operator == (char * key, const meeting & a_meet);
