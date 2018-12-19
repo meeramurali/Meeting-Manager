@@ -6,7 +6,10 @@
 //Program:  3
 //Date:     08/07/2017
 
-//This program manages
+//This program manages the meeting class for a single meeting.
+//A 'meeting' is derived from a 'grp_part' class which manages a 
+//group of participants for the meeting. 'grp_part' contains a
+//linear linked list of 'participant's.
 
 
 
@@ -92,6 +95,9 @@ contact::~contact()
 
 
 
+//Copies argument object
+//INPUT: object to copy
+//OUTPUT: success/failure
 int contact::copy_contact(const contact & to_copy)
 {
     int success = 0;    //number of data members copied
@@ -131,6 +137,8 @@ int contact::copy_contact(const contact & to_copy)
 
 
 //Displays contact details
+//INPUT: no arguemnts
+//OUTPUT: no return value
 int contact::display(void) const
 {
     //Null data members
@@ -181,6 +189,8 @@ int contact::set_contact(char * a_name, char * an_email)
 
 
 //Assignment operator overloading
+//INPUT: object to copy
+//OUTPUT: this object modified
 contact& contact::operator = (const contact & to_copy)
 {
     //If argument is not the same as the current object
@@ -197,6 +207,8 @@ contact& contact::operator = (const contact & to_copy)
 
 
 //Equality (==) operator overloading
+//INPUT: object to compare
+//OUTPUT: true if equal/false otherwise
 bool contact::operator == (const contact & to_compare) const
 {
     bool name_equal = false;        //Flag if names are equal
@@ -239,6 +251,8 @@ bool contact::operator == (const contact & to_compare) const
 
 
 //Equality (==) operator overloading
+//INPUT: object to compare
+//OUTPUT: true if equal/false otherwise
 bool contact::operator == (char * id_to_match) const
 {
     int len = 0;
@@ -269,6 +283,8 @@ bool contact::operator == (char * id_to_match) const
 
 
 //Equality (!=) operator overloading
+//INPUT: object to compare
+//OUTPUT: true if not equal/false otherwise
 bool contact::operator != (const contact & to_compare) const
 {
     //If all data members are equal, return false
@@ -281,6 +297,10 @@ bool contact::operator != (const contact & to_compare) const
 }
 
 
+
+//Writes data to file
+//INPUT: filename
+//OUTPUT success flag
 int contact::write_file_append(const char filename[]) const
 {
     ofstream out_file;          //File variable for output
@@ -406,7 +426,9 @@ participant::~participant()
 
 
 
-//Sets response
+//Sets response for a participant
+//INPUT: intent and comment for response
+//OUTPUT: success flag 0/1
 int participant::set_response(int an_intent, char * a_comment)
 {
     //Copy intent
@@ -437,10 +459,12 @@ int participant::set_response(int an_intent, char * a_comment)
 
 
 
-//Displays participant
+//Displays participant details
+//INPUT: no arguments
+//OUTPUT: success/failure: 1/0
 int participant::display(void) const
 {
-    int result = 0;
+    int result = 0;     //value to return
 
     //Display contact
     if (contact::display())
@@ -476,6 +500,8 @@ int participant::display(void) const
 
 
 //Compares argument with intent value
+//INPUT: intent to compare
+//OUTPUT: true if equal, false otherwise
 bool participant::check_intent(int an_intent) const
 {
     if (an_intent == intent)
@@ -488,6 +514,8 @@ bool participant::check_intent(int an_intent) const
 
 
 //Copies argument object
+//INPUT: object to copy
+//OUTPUT: success/failure (0/1)
 int participant::copy_participant(const participant & to_copy)
 {
     int result = 0;
@@ -527,6 +555,8 @@ int participant::copy_participant(const participant & to_copy)
 
 
 //Assignment operator overloading
+//INPUT: object to copy
+//OUTPUT: this object modified
 participant& participant::operator = (const participant& to_copy)
 {
     //If argument is not the same as the current object
@@ -542,6 +572,9 @@ participant& participant::operator = (const participant& to_copy)
 
 
 
+//Writes data to external file
+//INPUT: filename
+//OUTPUT: success/failure (1/0)
 int participant::write_file_append(const char filename[]) const
 {
     ofstream out_file;          //File variable for output
@@ -746,7 +779,7 @@ int grp_part::add(const participant & to_add)
 {
     participant_node * temp = NULL; //temporary pointer to 
                                 //create new node
-    int success = 0;
+    int success = 0;            //value to return
 
     //If participant already in list
     if (find(to_add))
@@ -770,11 +803,21 @@ int grp_part::add(const participant & to_add)
 
 
 
+//Adds response for a participant 
+//INPUT: email id to match, intent, comment
+//OUTPUT: 0: no match found, 1: match found, unable to set response 
+//(invalid intent), 2: success
 int grp_part::add_response(char * id_to_match, int an_intent, char * a_comment)
 {
     return add_response(head, id_to_match, an_intent, a_comment);
 }
 
+
+
+//Adds response for a participant 
+//INPUT: head pointer to list, email id to match, intent, comment
+//OUTPUT: 0: no match found, 1: match found, unable to set response 
+//(invalid intent), 2: success
 int grp_part::add_response(participant_node * & head, char * id_to_match, int an_intent, char * a_comment)
 {
     int result = 0; //0: no match found, 1: match found, unable to set response 
@@ -793,6 +836,7 @@ int grp_part::add_response(participant_node * & head, char * id_to_match, int an
             ++result;
     }
 
+    //recursive call to next node
     else
         result = add_response(head->go_next(), id_to_match, an_intent, a_comment);
 
@@ -852,6 +896,12 @@ int grp_part::concatenate(participant_node * & head, participant_node * & to_att
 }
 */
 
+
+
+
+//Assignment operator overloading
+//INPUT: object to copy
+//OUTPUT: this object modified
 grp_part& grp_part::operator = (const grp_part & to_copy)
 {
     //If argument is not the same as the current object
@@ -868,6 +918,8 @@ grp_part& grp_part::operator = (const grp_part & to_copy)
 
 
 //Compound assignment operator (+=) overloading
+//INPUT: object to add to list
+//OUTPUT: this object modified
 grp_part& grp_part::operator += (const participant & to_add)
 {
     if (add(to_add))
@@ -879,6 +931,9 @@ grp_part& grp_part::operator += (const participant & to_add)
 
 
 
+//Arithmetic (+) operator overloading
+//INPUT: a group object, participant to add to group
+//OUTPUT: temporary group modified
 grp_part operator + (const grp_part & a_grp, const participant & to_add)
 {
     grp_part temp(a_grp);
@@ -889,6 +944,9 @@ grp_part operator + (const grp_part & a_grp, const participant & to_add)
 
 
 
+//Arithmetic (+) operator overloading
+//INPUT: a group object, participant to add to group
+//OUTPUT: temporary group modified
 grp_part operator + (const participant & to_add, const grp_part & a_grp)
 {
     grp_part temp(a_grp);
@@ -900,11 +958,14 @@ grp_part operator + (const participant & to_add, const grp_part & a_grp)
 
 
 
+//Writes data to file
+//INPUT: file name to write to 
+//OUTPUT: sucess/failure (1/0)
 int grp_part::write_file_append(const char filename[]) const
 {
     ofstream out_file;          //File variable for output
     int success = 0;            //Value to return
-    participant_node * current = head;
+    participant_node * current = head;  //to traverse list of participants
 
     //Open file to write at beginning of file
     //(overwrites all content)
@@ -948,6 +1009,7 @@ meeting::meeting(): meeting_name(NULL), location(NULL), day_time(NULL), keyword(
 
 
 //Constructor with arguments
+//INPUT: data for each data member
 //OUTPUT: no return value
 meeting::meeting(char * a_meeting_name, char * a_location, char * a_day_time, char * a_keyword)
 {
@@ -1001,6 +1063,7 @@ meeting::meeting(char * a_meeting_name, char * a_location, char * a_day_time, ch
 
 
 //Constructor with arguments
+//INPUT: data for each data member
 //OUTPUT: no return value
 meeting::meeting(char * a_meeting_name, char * a_location, char * a_day_time, char * a_keyword, const grp_part & a_grp): grp_part(a_grp)
 {
@@ -1054,6 +1117,8 @@ meeting::meeting(char * a_meeting_name, char * a_location, char * a_day_time, ch
 
 
 //Copy constructor
+//INPUT: (object to copy)
+//OUTPUT: no return value
 meeting::meeting(const meeting & to_copy): grp_part(to_copy)
 {
     int a_key_len = 0;  //argument key length
@@ -1159,6 +1224,8 @@ int meeting::display(void) const
 
 
 //Copies meeting information
+//INPUT: object to copy
+//OUTPUT: success/failure (1/0)
 int meeting::copy_meeting(const meeting & to_copy)
 {
     //Delete any existing data
@@ -1222,6 +1289,9 @@ int meeting::copy_meeting(const meeting & to_copy)
 
 
 //Compares keyword with argument
+//INPUT: key to match
+//OUTPUT: 1 (match), 2 (current is less than key)
+//3 (current node is greater than key)
 int meeting::check_key(char * a_key) const
 {
     int result = 0;     //value to return
@@ -1259,6 +1329,9 @@ int meeting::check_key(char * a_key) const
 
 
 
+//Gets keyword for meeting
+//INPUT: key found
+//OUTPUT: 0/1 failure/success
 int meeting::get_key(char *& a_key) const
 {
     if (a_key != NULL)
@@ -1272,6 +1345,8 @@ int meeting::get_key(char *& a_key) const
 
 
 //Assignment operator overloading
+//INPUT: object to copy
+//OUTPUT: this object modified
 meeting& meeting::operator = (const meeting & to_copy)
 {
     //If argument is not the same as the current object
@@ -1288,6 +1363,8 @@ meeting& meeting::operator = (const meeting & to_copy)
 
 
 //Equality (==) operator overloading
+//INPUT: object to compare
+//OUTPUT: true if equal/false otherwise
 bool operator == (const meeting & a_meet, char * key)
 {
     if (a_meet.check_key(key) == 1)
@@ -1300,6 +1377,8 @@ bool operator == (const meeting & a_meet, char * key)
 
 
 //Equality (==) operator overloading
+//INPUT: object to compare
+//OUTPUT: true if equal/false otherwise
 bool operator == (char * key, const meeting & a_meet)
 {
     if (a_meet.check_key(key) == 1)
@@ -1313,6 +1392,8 @@ bool operator == (char * key, const meeting & a_meet)
 
 
 //Equality (!=) operator overloading
+//INPUT: object to compare
+//OUTPUT: true if not equal/false otherwise
 bool operator != (const meeting & a_meet, char * key)
 {
     if (a_meet.check_key(key) != 1)
@@ -1325,6 +1406,8 @@ bool operator != (const meeting & a_meet, char * key)
 
 
 //Equality (!=) operator overloading
+//INPUT: object to compare
+//OUTPUT: true if not equal/false otherwise
 bool operator != (char * key, const meeting & a_meet)
 {
     if (a_meet.check_key(key) != 1)
@@ -1337,6 +1420,8 @@ bool operator != (char * key, const meeting & a_meet)
 
 
 //Relational operator (<) overloading
+//INPUT: object to compare
+//OUTPUT: true if less than/false otherwise
 bool operator < (const meeting & a_meet, char * key)
 {
     if (a_meet.check_key(key) == 2)
@@ -1349,6 +1434,8 @@ bool operator < (const meeting & a_meet, char * key)
 
 
 //Relational operator (<) overloading
+//INPUT: object to compare
+//OUTPUT: true if less than/false otherwise
 bool operator < (char * key, const meeting & a_meet)
 {
     if (a_meet.check_key(key) == 2)
@@ -1361,6 +1448,8 @@ bool operator < (char * key, const meeting & a_meet)
 
 
 //Relational operator (>) overloading
+//INPUT: object to compare
+//OUTPUT: true if greater than/false otherwise
 bool operator > (const meeting & a_meet, char * key)
 {
     if (a_meet.check_key(key) == 3)
@@ -1373,6 +1462,8 @@ bool operator > (const meeting & a_meet, char * key)
 
 
 //Relational operator (>) overloading
+//INPUT: object to compare
+//OUTPUT: true if greater than/false otherwise
 bool operator > (char * key, const meeting & a_meet)
 {
     if (a_meet.check_key(key) == 3)
@@ -1385,6 +1476,8 @@ bool operator > (char * key, const meeting & a_meet)
 
 
 //Relational operator (<=) overloading
+//INPUT: object to compare
+//OUTPUT: true if less than or equal/false otherwise
 bool operator <= (const meeting & a_meet, char * key)
 {
     int compare = 0;
@@ -1401,6 +1494,8 @@ bool operator <= (const meeting & a_meet, char * key)
 
 
 //Relational operator (<=) overloading
+//INPUT: object to compare
+//OUTPUT: true if less than or equal/false otherwise
 bool operator <= (char * key, const meeting & a_meet)
 {
     int compare = 0;
@@ -1417,6 +1512,8 @@ bool operator <= (char * key, const meeting & a_meet)
 
 
 //Relational operator (>=) overloading
+//INPUT: object to compare
+//OUTPUT: true if greater than or equal/false otherwise
 bool operator >= (const meeting & a_meet, char * key)
 {
     int compare = 0;
@@ -1433,6 +1530,8 @@ bool operator >= (const meeting & a_meet, char * key)
 
 
 //Relational operator (>=) overloading
+//INPUT: object to compare
+//OUTPUT: true if greater than or equal/false otherwise
 bool operator >= (char * key, const meeting & a_meet)
 {
     int compare = 0;

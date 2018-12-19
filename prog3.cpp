@@ -6,7 +6,14 @@
 //Program:  3
 //Date:     08/07/2017
 
-//This program manages
+//This program is an OO aplication to post meetings and responses to a meetings.
+//The data structure used is a red-black balanced tree, which is sorted by 
+//a keyword for each node. Each node of the tree contains all meetings associated
+//with that specific keyword.
+//Supported operations include displaying all meetings in calendar in sorted order
+//of keyword, displaying all keywords in each level of the tree, displaying all
+//meetings for a specific keyword, posting a new meeting and responding to a
+//posted meeting. External data file is used to load and write data.
 
 
 
@@ -15,8 +22,7 @@
 
 
 //constants
-const char FILENAME[] = "calendar.txt";     //Filename to load data from
-const char WRITE_FILE[] = "write.txt";      //Filename to write data to
+const char WRITE_FILE[] = "calendar.txt";      //Filename to write data to
 
 
 
@@ -33,10 +39,10 @@ void add_response(rb_tree & meeting_calendar);            //Adds a response to a
 int main()
 {
     char menu_choice = 'a';  //user choice for menu operation
-    rb_tree calendar;
-    char * key_to_find = NULL;
-    int meetings_loaded = 0;
-    int result = 0;
+    rb_tree calendar;           //calendar of meetings
+    char * key_to_find = NULL;  //to find meetings for a key 
+    int meetings_loaded = 0;    //loaded from file
+    int result = 0;             //result of operation
 
     //Load meetings from external file
     meetings_loaded = calendar.load_file(WRITE_FILE);
@@ -160,16 +166,18 @@ void get_data(char * & dest)
 
 
 //Adds a response to a selected meeting
+//INPUT: calendar of meetings to add to 
+//OUTPUT: no return value
 void add_response(rb_tree & calendar)
 {
-    rb_node * match = NULL;
-    meeting_node * to_respond = NULL;
-    char * id_to_match = NULL;
-    int an_intent = -1;
-    char * a_comment = NULL;
-    int sn_torespond = 1;
-    char * key_to_find = NULL;
-    int result = 0;
+    rb_node * match = NULL;             //to find meeting to respond to 
+    meeting_node * to_respond = NULL;   //meeting to respond to
+    char * id_to_match = NULL;          //email of participant responding
+    int an_intent = -1;                 //response intent
+    char * a_comment = NULL;            //response comment
+    int sn_torespond = 1;               //to find meeting to respond to 
+    char * key_to_find = NULL;          //key to match
+    int result = 0;                     //result of match operation
 
     cout << "Finding meeting to respond to..." << endl;
     result = calendar.display_key_inorder();
@@ -246,19 +254,21 @@ void add_response(rb_tree & calendar)
 
 
 //Posts a new meeting to calendar
+//INPUT: a calendar of meetings to post to
+//OUTPUT: no return value
 void post_meeting(rb_tree & calendar)
 {
-    char * a_name = NULL;
-    char * a_email = NULL;
-    char * a_meeting_name = NULL;
-    char * a_meeting_loc = NULL;
-    char * a_meeting_datetime = NULL;
-    char * a_meeting_key = NULL;
-    contact * a_contact = NULL;
-    participant * a_ppant = NULL;
-    grp_part * a_grp = NULL;
-    meeting * a_meeting = NULL;
-    char response = 'y';
+    char * a_name = NULL;               //new participant name
+    char * a_email = NULL;              //new participant email
+    char * a_meeting_name = NULL;       //new meeting name
+    char * a_meeting_loc = NULL;        //new meeting location 
+    char * a_meeting_datetime = NULL;   //new meeting date, time
+    char * a_meeting_key = NULL;        //new keyword
+    contact * a_contact = NULL;         //temporary contact
+    participant * a_ppant = NULL;       //temporary participant
+    grp_part * a_grp = NULL;            //temporary group
+    meeting * a_meeting = NULL;         //new meeting to build
+    char response = 'y';                //to add another participant
 
     cout << "Enter meeting name: ";
     get_data(a_meeting_name);

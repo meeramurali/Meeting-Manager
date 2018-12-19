@@ -6,7 +6,14 @@
 //Program:  3
 //Date:     08/07/2017
 
-//This program manages
+//This program manages a red-black balanced tree, for an OO application 
+//for posting and responding to meetings, which is sorted by 
+//keywords. Each node of the tree contains all meetings associated
+//with that specific keyword.
+//Supported operations include displaying all meetings in calendar in sorted order
+//of keyword, displaying all keywords in each level of the tree, displaying all
+//meetings for a specific keyword, posting a new meeting and responding to a
+//posted meeting. External data file is used to load and write data.
 
 
 
@@ -96,7 +103,6 @@ class rb_tree
         int display_key_bylevels(void) const;
         int display_by_keyword(char * a_key) const;
         int find_by_keyword(rb_node *& found, char * a_key) const;
-//        rb_node& operator [] (char * a_key);
 
     private:
         rb_node * root;

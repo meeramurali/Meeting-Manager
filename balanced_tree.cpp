@@ -6,7 +6,14 @@
 //Program:  3
 //Date:     08/07/2017
 
-//This program manages
+//This program manages a red-black balanced tree, for an OO application 
+//for posting and responding to meetings, which is sorted by 
+//keywords. Each node of the tree contains all meetings associated
+//with that specific keyword.
+//Supported operations include displaying all meetings in calendar in sorted order
+//of keyword, displaying all keywords in each level of the tree, displaying all
+//meetings for a specific keyword, posting a new meeting and responding to a
+//posted meeting. External data file is used to load and write data.
 
 
 
@@ -302,7 +309,7 @@ bool rb_node::is_equal(char * to_compare) const
 int rb_node::display(void) const
 {
     int num_meetings = 0;   //value to return 
-    int count = 0;
+    int count = 0;          //to print serial no. for each meeting
 
     //Display node color
     if (color == RED)
@@ -355,7 +362,7 @@ int rb_node::display_key(void) const
 //OUTPUT: int return type: number of meetings
 int rb_node::display_all(meeting_node * head, int & count) const
 {
-    int displayed = 0;
+    int displayed = 0;      //value to return
 
     //base case
     if (!head)
@@ -440,21 +447,27 @@ int rb_node::add_meeting(meeting_node *& head, const meeting & to_add)
 
 
 
+//Finds meeting by position number - wrapper
+//INPUT: 2 arguments: pointer to found meeting, position number
+//OUTPUT: 0/1 - failure/success
 int rb_node::find_meeting_by_position(meeting_node *& found, int pos) const
 {
+    int timer = 0;  //to count each node position
+    
     if (found != NULL)
         return 0;
-
-    int timer = 0;
 
     return find_meeting_by_position(head, found, pos, timer);
 }
 
 
 
+//Finds meeting by position number recursively
+//INPUT: 3 arguments: head pointer to list of meetings, pointer to found meeting, position number
+//OUTPUT: 0/1 - failure/success
 int rb_node::find_meeting_by_position(meeting_node * head, meeting_node *& found, int pos, int & timer) const
 {
-    int match_found = 0;
+    int match_found = 0;    //flag for if match is found
 
     //base case
     if (!head)
@@ -462,12 +475,14 @@ int rb_node::find_meeting_by_position(meeting_node * head, meeting_node *& found
 
     ++timer;
 
+    //IF match is found
     if (timer == pos)
     {
         found = head;
         match_found = 1;
     }
 
+    //recursive call to next node
     else
         match_found = find_meeting_by_position(head->go_next(), found, pos, timer);
     
@@ -476,6 +491,9 @@ int rb_node::find_meeting_by_position(meeting_node * head, meeting_node *& found
 
 
 
+//Writes data to external file
+//INPUT: 1 argument: filename
+//OUTPUT: 0/1: failure/success
 int rb_node::write_file_append(const char filename[]) const
 {
     ofstream out_file;          //File variable for output
@@ -597,6 +615,7 @@ int rb_tree::write_file(rb_node * root, const char filename[]) const
 }
 
 
+
 //Removes all nodes recursively
 //INPUT: root pointer to tree
 //OUTPUT: int (number of nodes removed)
@@ -649,6 +668,10 @@ int rb_tree::insert(const meeting & to_add)
 
 
 //Performs regular binary search tree insert recursively
+//INPUT: 4 arguments: root pointer, meeting node to add, a rb_node pointer to 
+//point to the added node, timer to update parent pointer of new node
+//OUTPUT: 0: failure, 1: meeting inserted into existing node
+//2: new node created
 int rb_tree::BST_insert(rb_node *& root, const meeting_node & to_add, rb_node *& node_added, int & timer)
 {
     int insert_type = 0;    //Value to return: 1(meeting inserted into an existing node)
@@ -716,13 +739,15 @@ int rb_tree::BST_insert(rb_node *& root, const meeting_node & to_add, rb_node *&
 
 
 //Checks for and fixes red-black tree violations
+//INPUT: 2 arguments: (root pointer, pointer to newly added node)
+//OUTPUT: 0/1 - failure/success
 int rb_tree::convert_rb_tree(rb_node *& root, rb_node *& a_node)
 {
-    int success = 0;
-    bool violation = true;
-    rb_node * uncle = NULL;
-    rb_node * grand_parent = NULL;
-    rb_node * a_node_parent = NULL;
+    int success = 0;                //value to return
+    bool violation = true;          //flag if there is a red black tree violation
+    rb_node * uncle = NULL;         //pointer to uncle of new node
+    rb_node * grand_parent = NULL;  //pointer to grandparent of new node
+    rb_node * a_node_parent = NULL; //pointer to parent of new node
  
     //If new node is not the root
     //If node is red and its parent is also red...
@@ -764,6 +789,7 @@ int rb_tree::convert_rb_tree(rb_node *& root, rb_node *& a_node)
                             a_node_parent = a_node->go_parent();
                         }
 
+                        //perform right rotation
                         right_rotate(root, grand_parent);
                         if (swap_color(a_node_parent, grand_parent))
                             a_node = a_node_parent;
@@ -791,12 +817,13 @@ int rb_tree::convert_rb_tree(rb_node *& root, rb_node *& a_node)
                         //If node is left child of parent
                         if (a_node == a_node_parent->go_left())
                         {
-                            //perform left rotation
+                            //perform right rotation
                             right_rotate(root, a_node_parent);
                             a_node = a_node_parent;
                             a_node_parent = a_node->go_parent();
                         }
 
+                        //perform left rotation
                         left_rotate(root, grand_parent);
                         if (swap_color(a_node_parent, grand_parent))
                             a_node = a_node_parent;
@@ -808,6 +835,7 @@ int rb_tree::convert_rb_tree(rb_node *& root, rb_node *& a_node)
         else
             violation = false;
 
+        //set root color to black
         if (root->set_color(BLACK))
             ++success;
     }
@@ -817,12 +845,16 @@ int rb_tree::convert_rb_tree(rb_node *& root, rb_node *& a_node)
 
 
 
+//Swaps color of 2 nodes
+//INPUT: 2 nodes to swap color
+//OUTPUT: 0/1: failure/success
 int rb_tree::swap_color(rb_node *& node1, rb_node *& node2)
 {
-    int success = 0;
-    int node1_color = node1->get_color();
-    int node2_color = node2->get_color();
+    int success = 0;                        //value to return 
+    int node1_color = node1->get_color();   //color of first node
+    int node2_color = node2->get_color();   //color of second node
 
+    //swap colors
     if (node1->set_color(node2_color) && node2->set_color(node1_color))
         ++success;
 
@@ -831,7 +863,9 @@ int rb_tree::swap_color(rb_node *& node1, rb_node *& node2)
 
 
 
-//Left rotate
+//Performs left rotation for new node
+//INPUT: root pointer, newly added node
+//OUTPUT: no return value
 void rb_tree::left_rotate(rb_node *& root, rb_node *& a_node)
 {
     //Use temporary pointer to hold a_node's current right child
@@ -865,7 +899,9 @@ void rb_tree::left_rotate(rb_node *& root, rb_node *& a_node)
 
 
 
-//Right rotate
+//Performs right rotation for new node
+//INPUT: root pointer, newly added node
+//OUTPUT: no return value
 void rb_tree::right_rotate(rb_node *& root, rb_node *& a_node)
 {
     //Use temporary pointer to hold a_node's current left child
@@ -899,15 +935,22 @@ void rb_tree::right_rotate(rb_node *& root, rb_node *& a_node)
 
 
 
-//Displays all nodes in order
+//Displays all nodes in order of keywords - wrapper
+//INPUT: no arguments
+//OUTPUT: number displayed
 int rb_tree::display_inorder(void) const
 {
     return display_inorder(root);
 }
 
+
+
+//Displays all nodes in order of keywords recursively
+//INPUT: root pointer
+//OUTPUT: number displayed
 int rb_tree::display_inorder(rb_node * root) const
 {
-    int displayed = 0;
+    int displayed = 0;  //value to return
     
     //base case
     if (!root)
@@ -938,9 +981,14 @@ int rb_tree::display_key_inorder(void) const
     return display_key_inorder(root);
 }
 
+
+
+//Displays all keywords in order recursively
+//INPUT: root pointer
+//OUTPUT: int: number of keywords
 int rb_tree::display_key_inorder(rb_node * root) const
 {
-    int displayed = 0;
+    int displayed = 0;  //number of keywords
     
     //base case
     if (!root)
@@ -963,6 +1011,8 @@ int rb_tree::display_key_inorder(rb_node * root) const
 
 
 //Finds height of tree
+//INPUT: root pointer
+//OUTPUT: height of tree
 int rb_tree::height(rb_node * root) const
 {
     //base case
@@ -975,14 +1025,17 @@ int rb_tree::height(rb_node * root) const
 
 
 //Displays all nodes each level
+//INPUT: root pointer
+//OUTPUT: number of levels
 int rb_tree::display_key_bylevels(void) const
 {
-    int levels = 0;
-    int ht = height(root);
+    int levels = 0;         //number of levels
+    int ht = height(root);  //height of tree
 
     //Repeat for each level in tree
     for (int i = 1; i <= ht; ++i)
     {
+        //Display current level
         cout << "\n*** Level " << i << ": ***" << endl;
         if (display_lvl(root, i))
         {
@@ -996,9 +1049,11 @@ int rb_tree::display_key_bylevels(void) const
 
 
 //Displays all nodes in a specific level
+//INPUT: 2 arguments (root pointer, current level number)
+//OUTPUT: number of nodes in level
 int rb_tree::display_lvl(rb_node * root, int lvl) const
-{
-    int displayed = 0;
+{   
+    int displayed = 0;  //number of nodes in level
 
     //base case
     if (!root || lvl < 1)
@@ -1103,7 +1158,7 @@ int rb_tree::load_file(const char filename[])
     char meeting_date_time[101];   //Temporary variable to read in meeting date and time
     char meeting_key[101];         //Temporary variable to read in meeting keyword
     int meetings_added = 0;        //Value to return
-    grp_part * meeting_grp = NULL;
+    grp_part * meeting_grp = NULL; //Temporary pointer to read a new group of participants
     ifstream in_file;              //File variable for input
   
     //Connect to particular file
@@ -1176,11 +1231,11 @@ int rb_tree::load_file(const char filename[])
 int rb_tree::extract_participants(char * all_participants, grp_part & a_grp)
 {
     participant * new_participant = NULL;    //Temporary pointer to add each participant 
-    contact * new_contact = NULL;
+    contact * new_contact = NULL;            //Temporary pointer to add each contact
     char participant_name[100];         //Extracted participant name
     char participant_email[100];         //Extracted participant email
-    int participant_intent = -1;
-    char participant_comment[500];
+    int participant_intent = -1;        //to read intent of current participant
+    char participant_comment[500];      //to read comment for current participant
     char * dest = participant_name;     //to traverse extracted participant name
     int size = 0;           //Length of all_participants array
     int index = 0;          //Loop variable -  array index
@@ -1219,7 +1274,8 @@ int rb_tree::extract_participants(char * all_participants, grp_part & a_grp)
             timer = 1;        
             dest = participant_email;
         }
-            
+        
+        //Copy email    
         else if (timer == 1 &&
                  all_participants[index] != '^')
         {
@@ -1243,6 +1299,7 @@ int rb_tree::extract_participants(char * all_participants, grp_part & a_grp)
             dest = participant_comment;
         }
 
+        //Copy intent
         else if (timer == 2 &&
                  all_participants[index] != ';' &&
                  all_participants[index] != '\0')
@@ -1266,6 +1323,7 @@ int rb_tree::extract_participants(char * all_participants, grp_part & a_grp)
             timer = 3;
         }
 
+        //Copy comment
         else if (timer == 3 && 
                  all_participants[index] != ';' &&
                  all_participants[index] != '\0')
@@ -1275,6 +1333,7 @@ int rb_tree::extract_participants(char * all_participants, grp_part & a_grp)
             ++index;
         }
 
+        //end of comment
         else if (all_participants[index] == ';' ||
                  all_participants[index] == '\0')
         {
@@ -1284,6 +1343,7 @@ int rb_tree::extract_participants(char * all_participants, grp_part & a_grp)
             timer = 4;
         }
 
+        //build participant and add to group
         if (timer == 4)
         {
             //Create a new contact 
@@ -1315,6 +1375,9 @@ int rb_tree::extract_participants(char * all_participants, grp_part & a_grp)
 
 
 
+//Finds node in tree that matches keyword
+//INPUT: a pointer to node, key to match
+//OUTPUT: success/failure: 1/0
 int rb_tree::find_by_keyword(rb_node *& found, char * a_key) const
 {
     return find_by_key(found, root, a_key);
@@ -1322,9 +1385,12 @@ int rb_tree::find_by_keyword(rb_node *& found, char * a_key) const
 
 
 
+//Finds node in tree that matches keyword
+//INPUT: a pointer to node, root pointer, key to match
+//OUTPUT: success/failure: 1/0
 int rb_tree::find_by_key(rb_node *& found, rb_node * root, char * a_key) const
 {
-    int match_found = 0;
+    int match_found = 0;    //flag if match found
 
     //base case
     if(!root)

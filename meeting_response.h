@@ -6,7 +6,10 @@
 //Program:  3
 //Date:     08/07/2017
 
-//This program manages
+//This program manages the meeting class for a single meeting.
+//A 'meeting' is derived from a 'grp_part' class which manages a 
+//group of participants for the meeting. 'grp_part' contains a
+//linear linked list of 'participant's.
 
 
 
@@ -36,8 +39,6 @@ class contact
         virtual bool operator == (const contact& to_compare) const;
         virtual bool operator == (char * id_to_match) const;
         virtual bool operator != (const contact& to_compare) const;
-//        friend ostream& operator << (ostream&, const contact&);
-//        int read_contact(void);
         int write_file_append(const char filename[]) const;
 
     protected:
@@ -92,12 +93,10 @@ class grp_part
         int copy_group(const grp_part & to_copy);
         bool find(const participant & to_find) const;
         virtual int display(void) const;
-//        int concatenate(const grp_part & a_grp);
         virtual grp_part& operator = (const grp_part & to_copy);
         grp_part& operator += (const participant & to_add);
         friend grp_part operator + (const grp_part & a_grp, const participant & to_add);
         friend grp_part operator + (const participant & to_add, const grp_part & a_grp);
-//        grp_part operator + (const grp_part & grp1, const grp_part & grp2);
         int write_file_append(const char filename[]) const;
 
     protected:
@@ -108,7 +107,6 @@ class grp_part
         int copy_group(participant_node * & dest, participant_node * src);
         bool find(participant_node * head, const participant & to_find) const;
         int add_response(participant_node * & head, char * id_to_match, int an_intent, char * a_comment);
-//        int concatenate(participant_node * & head, participant_node * & to_attach);
 };
 
 class meeting: public grp_part
