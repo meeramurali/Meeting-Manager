@@ -35,6 +35,7 @@ class contact
         virtual int display(void) const;
         virtual contact& operator = (const contact& to_copy);
         virtual bool operator == (const contact& to_compare) const;
+        virtual bool operator == (char * id_to_match) const;
         virtual bool operator != (const contact& to_compare) const;
 //        friend ostream& operator << (ostream&, const contact&);
 //        int read_contact(void);
@@ -44,52 +45,76 @@ class contact
         char * email;
 };
 
-class contact_node: public contact
+class participant: public contact
 {
     public:
-        contact_node();
-        contact_node(const contact & to_copy);
-        contact_node(const contact_node & to_copy);
-//        ~contact_node();
+        participant();
+        participant(const contact & to_copy);
+        participant(const contact & to_copy, int an_intent, char * a_comment);
+        participant(const participant & to_copy);
+        ~participant();    
 
-        contact_node *& go_next(void);
-        void connect_next(contact_node * connection);
-
-    private:
-        contact_node * next;
-};
-
-class group_contacts
-{
-    public:
-        group_contacts();
-        group_contacts(const group_contacts & to_copy);
-        virtual ~group_contacts();
-
-        int add_contact(const contact & to_add);
-        virtual int display(void) const;
-        int copy_group(const group_contacts & to_copy);
-//        int concatenate(const group_contacts & a_grp);
-        virtual group_contacts& operator = (const group_contacts & to_copy);
-        friend group_contacts operator + (const group_contacts & a_grp, const contact & to_add);
-        friend group_contacts operator + (const contact & to_add, const group_contacts & a_grp);
-//        group_contacts operator + (const group_contacts & grp1, const group_contacts & grp2);
+        int set_response(int an_intent, char * a_comment);
+        int display(void) const;
+        bool check_intent(int an_intent) const;
+        int copy_participant(const participant & to_copy);
+        participant& operator = (const participant& to_copy);
 
     protected:
-        contact_node * head;
-
-        int remove_all(contact_node * & head);
-        int display(contact_node * head) const;
-        int copy_group(contact_node * & dest, contact_node * src);
-//        int concatenate(contact_node * & head, contact_node * & to_attach);
+        int intent;     //0:No, 1:Maybe, 2:Yes, -1:default
+        char * comment;
 };
 
-class meeting: public group_contacts
+class participant_node: public participant
+{
+    public:
+        participant_node();
+        participant_node(const participant & to_copy);
+        participant_node(const participant_node & to_copy);
+
+        participant_node *& go_next(void);
+        void connect_next(participant_node * connection);
+
+    private:
+        participant_node * next;
+};
+
+class grp_part
+{
+    public:
+        grp_part();
+        grp_part(const grp_part & to_copy);
+        virtual ~grp_part();
+
+        int add(const participant & to_add);
+        int add_response(char * id_to_match, int an_intent, char * a_comment);
+        int copy_group(const grp_part & to_copy);
+        bool find(const participant & to_find) const;
+        virtual int display(void) const;
+//        int concatenate(const grp_part & a_grp);
+        virtual grp_part& operator = (const grp_part & to_copy);
+        grp_part& operator += (const participant & to_add);
+        friend grp_part operator + (const grp_part & a_grp, const participant & to_add);
+        friend grp_part operator + (const participant & to_add, const grp_part & a_grp);
+//        grp_part operator + (const grp_part & grp1, const grp_part & grp2);
+
+    protected:
+        participant_node * head;
+
+        int remove_all(participant_node * & head);
+        int display(participant_node * head) const;
+        int copy_group(participant_node * & dest, participant_node * src);
+        bool find(participant_node * head, const participant & to_find) const;
+        int add_response(participant_node * & head, char * id_to_match, int an_intent, char * a_comment);
+//        int concatenate(participant_node * & head, participant_node * & to_attach);
+};
+
+class meeting: public grp_part
 {
     public:
         meeting();
         meeting(char * a_meeting_name, char * a_location, char * a_day_time, char * a_keyword);
-        meeting(char * a_meeting_name, char * a_location, char * a_day_time, char * a_keyword, const group_contacts & a_grp);
+        meeting(char * a_meeting_name, char * a_location, char * a_day_time, char * a_keyword, const grp_part & a_grp);
         meeting(const meeting & to_copy);
         ~meeting();
 
@@ -116,23 +141,6 @@ class meeting: public group_contacts
         char * day_time;
         char * keyword;
 };
-
-class response: public contact
-{
-    public:
-        response();
-        response(const contact & to_copy, int an_intent, char * a_comment);
-        response(const response & to_copy);
-        ~response();    
-
-        int display(void) const;
-        int check_intent(char * an_intent) const;
-
-    protected:
-        int intent;     //0:No, 1:Maybe, 2:Yes, -1:default
-        char * comment;
-};
-
 
 
 

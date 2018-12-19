@@ -138,7 +138,7 @@ int contact::display(void) const
         return 0;
 
     //Display name and email id
-    cout << "\t" << name << " | " << email;
+    cout << "\t" << name << "\t(" << email << ")";
    
     return 1; 
 }
@@ -236,6 +236,35 @@ bool contact::operator == (const contact & to_compare) const
 }
 
 
+//Equality (==) operator overloading
+bool contact::operator == (char * id_to_match) const
+{
+    int len = 0;
+    char * id_lower = NULL;
+    int result = 0;
+
+    if (!id_to_match || !email)
+        return false;
+
+    //Convert to lower case
+    len = strlen(id_to_match);
+    id_lower = new char [len + 1];
+    for (int i = 0; i < len; ++i)
+        id_lower[i] = tolower(id_to_match[i]);
+    id_lower[len] = '\0';
+
+    result = strcmp(email, id_lower);
+    
+    delete [] id_lower;
+    id_lower = NULL;
+
+    if (result == 0)
+        return true;
+
+    else
+        return false;
+}
+
 
 //Equality (!=) operator overloading
 bool contact::operator != (const contact & to_compare) const
@@ -264,29 +293,249 @@ ostream& operator << (ostream& ouput, const contact& object)
 //Default constructor
 //INPUT: no arguments
 //OUTPUT: no return value
-contact_node::contact_node(): next(NULL) {}
+participant::participant(): intent(-1), comment(NULL) {}
+
+
+
+//Constructor with arguments
+//OUTPUT: no return value
+participant::participant(const contact & to_copy): contact(to_copy), intent(-1), comment(NULL) {}
+
+
+
+//Constructor with arguments
+//OUTPUT: no return value
+participant::participant(const contact & to_copy, int an_intent, char * a_comment): contact(to_copy)
+{
+    if (an_intent >= 0 && an_intent <=2)
+    {
+        intent = an_intent;
+
+        if (a_comment)
+        {
+            comment = new char[strlen(a_comment) + 1];
+            strcpy(comment, a_comment);
+        }
+
+        else
+            comment = NULL;
+    }
+
+    else
+    {
+        intent = -1;
+        comment = NULL;
+    }
+}
+
+
+
+//Copy constructor
+//INPUT: 1 argument: a participant object to copy
+//OUTPUT: no return value
+participant::participant(const participant & to_copy): contact(to_copy)
+{
+    //Copy intent
+    if (to_copy.intent >= 0 && to_copy.intent <=2)
+    {
+        intent = to_copy.intent;
+        
+        //Copy comment
+        if (to_copy.comment)
+        {
+            comment = new char[strlen(to_copy.comment) + 1];
+            strcpy(comment, to_copy.comment);
+        }
+
+        else
+            comment = NULL;
+    }
+
+    else
+    {
+        intent = -1;
+        comment = NULL;
+    }
+}
+
+
+
+//Destructor - releases all dynamic memory
+//INPUT: no arguments
+//OUTPUT: no return value
+participant::~participant()
+{
+    intent = -1;
+    if (comment)
+    {
+        delete [] comment;
+        comment = NULL;
+    }
+}
+
+
+
+//Sets response
+int participant::set_response(int an_intent, char * a_comment)
+{
+    //Copy intent
+    if (an_intent >= 0 && an_intent <=2)
+    {
+        intent = an_intent;
+
+        //Delete any existing comments
+        if (comment)
+        {
+            delete [] comment;
+            comment = NULL;
+        }
+        
+        //Copy comment
+        if (a_comment)
+        {
+            comment = new char[strlen(a_comment) + 1];
+            strcpy(comment, a_comment);
+        }
+
+        return 1;
+    }
+    
+    else
+        return 0;
+}
+
+
+
+//Displays participant
+int participant::display(void) const
+{
+    int result = 0;
+
+    //Display contact
+    if (contact::display())
+    {
+        if (intent != -1)
+        {
+            cout << "\t| Response: ";
+            
+            //Display intent
+            if (intent == 0)
+                cout << "No";
+
+            else if (intent == 1)
+                cout << "Maybe";
+
+            else 
+                cout << "Yes";
+               
+            //Display comment if any 
+            if (comment)
+                cout << "\t\t| Comment: " << comment;
+        }
+
+        else
+            cout << "\t| No response yet" << endl;
+    
+        result = 1;
+    }
+    
+    return result;
+}
+
+
+
+//Compares argument with intent value
+bool participant::check_intent(int an_intent) const
+{
+    if (an_intent == intent)
+        return true;
+    
+    else
+        return false;
+}
+
+
+
+//Copies argument object
+int participant::copy_participant(const participant & to_copy)
+{
+    int result = 0;
+
+    //Copy contact info
+    if (copy_contact(to_copy))
+    {
+        //Copy intent
+        if (to_copy.intent >= 0 && to_copy.intent <=2)
+        {
+            intent = to_copy.intent;
+            
+            //Delete any existing data
+            if (comment)
+            {
+                delete [] comment;
+                comment = NULL;
+            }
+            
+            //Copy comment
+            if (to_copy.comment)
+            {
+                comment = new char[strlen(to_copy.comment) + 1];
+                strcpy(comment, to_copy.comment);
+            }
+        }
+
+        else
+            intent = -1;
+        
+        result = 1;
+    }
+
+    return result;
+}
+
+
+
+//Assignment operator overloading
+participant& participant::operator = (const participant& to_copy)
+{
+    //If argument is not the same as the current object
+    if (this != &to_copy)
+    {
+        //Copy argument
+        if (!copy_participant(to_copy))
+            return *this;
+    }
+    
+    return *this;
+}
+
+
+
+//Default constructor
+//INPUT: no arguments
+//OUTPUT: no return value
+participant_node::participant_node(): next(NULL) {}
 
 
 
 //Constructor with arguments
 //INPUT: 1 argument: a contact object to copy
 //OUTPUT: no return value
-contact_node::contact_node(const contact & to_copy): contact(to_copy), next(NULL) {}
+participant_node::participant_node(const participant & to_copy): participant(to_copy), next(NULL) {}
 
 
 
 //Copy constructor
-//INPUT: 1 argument: a contact_node object to copy
+//INPUT: 1 argument: a participant_node object to copy
 //OUTPUT: no return value
-contact_node::contact_node(const contact_node & to_copy): contact(to_copy), next(NULL) {}
-
+participant_node::participant_node(const participant_node & to_copy): participant(to_copy), next(NULL) {}
 
 
 
 //Returns the node's next pointer by reference
 //INPUT: no arguments
 //OUTPUT: node's next pointer by reference
-contact_node *& contact_node::go_next(void)
+participant_node *& participant_node::go_next(void)
 {
     return next;
 }
@@ -296,7 +545,7 @@ contact_node *& contact_node::go_next(void)
 //Sets next pointer to point to same node as argument
 //INPUT: 1 argument: location to set next pointer to 
 //OUTPUT: no return value
-void contact_node::connect_next(contact_node * connection)
+void participant_node::connect_next(participant_node * connection)
 {
     next = connection;   
     return;  
@@ -307,14 +556,14 @@ void contact_node::connect_next(contact_node * connection)
 //Default constructor
 //INPUT: no arguments
 //OUTPUT: no return value
-group_contacts::group_contacts(): head(NULL) {}
+grp_part::grp_part(): head(NULL) {}
 
 
 
 //Copy constructor
 //INPUT: 1 argument: an object to copy
 //OUTPUT: no return value
-group_contacts::group_contacts(const group_contacts & to_copy)
+grp_part::grp_part(const grp_part & to_copy)
 {
     head = NULL;
 
@@ -328,7 +577,7 @@ group_contacts::group_contacts(const group_contacts & to_copy)
 //Destructor - releases all dynamic memory
 //INPUT: no arguments
 //OUTPUT: no return value
-group_contacts::~group_contacts()
+grp_part::~grp_part()
 {
     if (remove_all(head))
         head = NULL;
@@ -339,7 +588,7 @@ group_contacts::~group_contacts()
 //Removes all nodes in LLL recursively
 //INPUT: 1 argument: head pointer to LLL passed by reference
 //OUTPUT: return type: int (no of nodes removed)
-int group_contacts::remove_all(contact_node * & head)
+int grp_part::remove_all(participant_node * & head)
 {
     int removed = 0;    //Number of nodes removed
 
@@ -359,9 +608,9 @@ int group_contacts::remove_all(contact_node * & head)
 
 
 //Wrapper - Copies a group of contacts
-//INPUT: 1 argument: a group_contacts object to copy
+//INPUT: 1 argument: a grp_part object to copy
 //OUTPUT: return type: int (number of nodes copied)
-int group_contacts::copy_group(const group_contacts & to_copy)
+int grp_part::copy_group(const grp_part & to_copy)
 {
     //Delete any existing data
     if (head)
@@ -378,7 +627,7 @@ int group_contacts::copy_group(const group_contacts & to_copy)
 //Copies a group of contacts recursively
 //INPUT: 2 arguments: destination list head pointer, source head pointer
 //OUTPUT: return type: int (number of nodes copied)
-int group_contacts::copy_group(contact_node * & dest, contact_node * src)
+int grp_part::copy_group(participant_node * & dest, participant_node * src)
 {
     int copied = 0;     //number of nodes copied
 
@@ -390,7 +639,7 @@ int group_contacts::copy_group(contact_node * & dest, contact_node * src)
     }
 
     //copy current node
-    dest = new contact_node(*src);
+    dest = new participant_node(*src);
     ++copied;
 
     //recursive call
@@ -401,17 +650,45 @@ int group_contacts::copy_group(contact_node * & dest, contact_node * src)
 
 
 
+//Searches for argument participant in list
+bool grp_part::find(const participant & to_find) const
+{
+    return find(head, to_find);
+}
+
+
+
+bool grp_part::find(participant_node * head, const participant & to_find) const
+{
+    //base case
+    if (!head)
+        return false;
+
+    //Compare with current participant
+    if (*head == to_find)
+        return true;
+    
+    else
+        return find(head->go_next(), to_find);
+}
+
+
+
 //Adds a new node to beginning of list
 //INPUT: 1 argument: a contact object to add
 //OUTPUT: return type: int (0/1 - failure/success)
-int group_contacts::add_contact(const contact & to_add)
+int grp_part::add(const participant & to_add)
 {
-    contact_node * temp = NULL; //temporary pointer to 
+    participant_node * temp = NULL; //temporary pointer to 
                                 //create new node
     int success = 0;
 
+    //If participant already in list
+    if (find(to_add))
+        return 0;
+
     //Create new node
-    temp = new contact_node(to_add);
+    temp = new participant_node(to_add);
 
     //base case - empty list
     if (!head)
@@ -428,10 +705,41 @@ int group_contacts::add_contact(const contact & to_add)
 
 
 
+int grp_part::add_response(char * id_to_match, int an_intent, char * a_comment)
+{
+    return add_response(head, id_to_match, an_intent, a_comment);
+}
+
+int grp_part::add_response(participant_node * & head, char * id_to_match, int an_intent, char * a_comment)
+{
+    int result = 0; //0: no match found, 1: match found, unable to set response 
+                    //(invalid intent), 2: success
+
+    //base case
+    if (!head)
+        return 0;
+
+    //compare current node with id
+    if (*head == id_to_match)
+    {
+        ++result;
+
+        if (head->set_response(an_intent, a_comment))
+            ++result;
+    }
+
+    else
+        result = add_response(head->go_next(), id_to_match, an_intent, a_comment);
+
+    return result;
+}
+
+
+
 //Wrapper - Displays all contacts in list
 //INPUT: no arguments
 //OUTPUT: return type: int (no. of nodes displayed)
-int group_contacts::display(void) const
+int grp_part::display(void) const
 {
     return display(head);
 }
@@ -441,7 +749,7 @@ int group_contacts::display(void) const
 //Displays all contacts in list recursively
 //INPUT: 1 argument: head pointer 
 //OUTPUT: return type: int (no. of nodes displayed)
-int group_contacts::display(contact_node * head) const
+int grp_part::display(participant_node * head) const
 {
     int displayed = 0;  //number of nodes displayed
 
@@ -462,10 +770,9 @@ int group_contacts::display(contact_node * head) const
     return displayed;
 }
 
-
 /*
 //Appends a copy of argument list to current list
-int group_contacts::concatenate(const group_contacts & a_grp)
+int grp_part::concatenate(const grp_part & a_grp)
 {
     
     return concatenate(head, a_grp.head);
@@ -473,21 +780,21 @@ int group_contacts::concatenate(const group_contacts & a_grp)
 
 
 
-int group_contacts::concatenate(contact_node * & head, contact_node * & to_attach)
+int grp_part::concatenate(participant_node * & head, participant_node * & to_attach)
 {
     //base case
     
 }
 */
 
-
-group_contacts& group_contacts::operator = (const group_contacts & to_copy)
+grp_part& grp_part::operator = (const grp_part & to_copy)
 {
     //If argument is not the same as the current object
     if (this != &to_copy)
     {
         //Copy argument into current object
-        if (!copy_group(to_copy));
+        if (!copy_group(to_copy))
+            return *this;
     }
     
     return *this;
@@ -495,21 +802,33 @@ group_contacts& group_contacts::operator = (const group_contacts & to_copy)
 
 
 
-group_contacts operator + (const group_contacts & a_grp, const contact & to_add)
+//Compound assignment operator (+=) overloading
+grp_part& grp_part::operator += (const participant & to_add)
 {
-    group_contacts temp(a_grp);
+    if (add(to_add))
+        return *this;
 
-    temp.add_contact(to_add);
+    else
+        return *this;
+}
+
+
+
+grp_part operator + (const grp_part & a_grp, const participant & to_add)
+{
+    grp_part temp(a_grp);
+
+    temp.add(to_add);
         return temp; 
 }
 
 
 
-group_contacts operator + (const contact & to_add, const group_contacts & a_grp)
+grp_part operator + (const participant & to_add, const grp_part & a_grp)
 {
-    group_contacts temp(a_grp);
+    grp_part temp(a_grp);
 
-    if (temp.add_contact(to_add));
+    if (temp.add(to_add));
 
     return temp; 
 }
@@ -578,7 +897,7 @@ meeting::meeting(char * a_meeting_name, char * a_location, char * a_day_time, ch
 
 //Constructor with arguments
 //OUTPUT: no return value
-meeting::meeting(char * a_meeting_name, char * a_location, char * a_day_time, char * a_keyword, const group_contacts & a_grp): group_contacts(a_grp)
+meeting::meeting(char * a_meeting_name, char * a_location, char * a_day_time, char * a_keyword, const grp_part & a_grp): grp_part(a_grp)
 {
     int a_key_len = 0;  //argument key length
     char default_key[] = "unassigned";  //default keyword if argument key is NULL
@@ -630,7 +949,7 @@ meeting::meeting(char * a_meeting_name, char * a_location, char * a_day_time, ch
 
 
 //Copy constructor
-meeting::meeting(const meeting & to_copy): group_contacts(to_copy)
+meeting::meeting(const meeting & to_copy): grp_part(to_copy)
 {
     int a_key_len = 0;  //argument key length
     char default_key[] = "unassigned";  //default keyword if argument key is NULL
@@ -725,7 +1044,7 @@ int meeting::display(void) const
     cout << "Day, time: " << day_time << endl;
     cout << "Keyword: " << keyword << endl;
     cout << "Participants: " << endl;
-    num_part = group_contacts::display();
+    num_part = grp_part::display();
     if (!num_part)
         cout << "\tNone" << endl;
 
@@ -1012,103 +1331,7 @@ bool operator >= (char * key, const meeting & a_meet)
 
 
 
-//Default constructor
-//INPUT: no arguments
-//OUTPUT: no return value
-response::response(): intent(-1), comment(NULL) {}
 
-
-
-//Constructor with arguments
-//OUTPUT: no return value
-response::response(const contact & to_copy, int an_intent, char * a_comment): contact(to_copy)
-{
-    if (an_intent >= 0 && an_intent <=2)
-        intent = an_intent;
-    else
-        intent = -1;
-
-    if (a_comment)
-    {
-        comment = new char[strlen(a_comment) + 1];
-        strcpy(comment, a_comment);
-    }
-    else
-        comment = NULL;
-}
-
-
-
-//Copy constructor
-//INPUT: 1 argument: a response object to copy
-//OUTPUT: no return value
-response::response(const response & to_copy): contact(to_copy)
-{
-    //Copy intent
-    if (to_copy.intent >= 0 && to_copy.intent <=2)
-        intent = to_copy.intent;
-    else
-        intent = -1;
-
-    //Copy comment
-    if (to_copy.comment)
-    {
-        comment = new char[strlen(to_copy.comment) + 1];
-        strcpy(comment, to_copy.comment);
-    }
-    else
-        comment = NULL;
-}
-
-
-
-//Destructor - releases all dynamic memory
-//INPUT: no arguments
-//OUTPUT: no return value
-response::~response()
-{
-    intent = -1;
-    if (comment)
-    {
-        delete [] comment;
-        comment = NULL;
-    }
-}
-
-
-
-//Displays response
-int response::display(void) const
-{
-    int result = 0;
-
-    //Display contact
-    if (contact::display())
-    {
-        //Display intent
-        cout << ":\t";
-
-        if (intent == 0)
-            cout << "No";
-
-        else if (intent == 1)
-            cout << "Maybe";
-
-        else if (intent == 2)
-            cout << "Yes";
-
-        else
-            cout << "-";
-           
-        //Display comment if any 
-        if (comment)
-            cout << "\t" << comment << endl;
-    
-        result = 1;
-    }
-    
-    return result;
-}
 
 
 
