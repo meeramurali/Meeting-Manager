@@ -42,6 +42,12 @@ int main()
     participant * a_ppant = NULL;
     grp_part * a_grp = NULL;
     meeting * a_meeting = NULL;
+    rb_node * match = NULL;
+    meeting_node * to_respond = NULL;
+    char * id_to_match = NULL;
+    int an_intent = -1;
+    char * a_comment = NULL;
+    int sn_torespond = 1;
     char response = 'y';
     int meetings_loaded = 0;
     int result = 0;
@@ -168,16 +174,75 @@ int main()
         //Prompt user accordingly based on result
         else if (menu_choice == 'e')
         {
+            cout << "Finding meeting to respond to..." << endl;
+            result = calendar.display_key_inorder();
             cout << "Enter keyword to search for: ";
             get_data(key_to_find);
         
-            result = calendar.display_by_keyword(key_to_find);
-            cout << result << " matches found" << endl;
+            if (calendar.find_by_keyword(match, key_to_find))
+            {
+                //Display all matches for keyword
+                result = match->display();
+                cout << result << " matches found for keyword" << endl;
 
-            delete [] key_to_find;
-            key_to_find = NULL;   
+                //Read serial number of meeting to respond to
+                cout << "\nEnter S/N of meeting to respond to (e.g. 1): ";
+                cin >> sn_torespond;
+                cin.ignore(100, '\n');
 
-            //Respond to meeting
+                if (match->find_meeting_by_position(to_respond, sn_torespond))
+                {
+                    //Read email id of person responding
+                    cout << "\nEnter email id of person responding to meeting (e.g. joe@pdx.edu): ";
+                    get_data(id_to_match);
+
+                    //Read response
+                    cout << "\nEnter intent (0 (No), 1 (Maybe), or 2 (Yes)): ";
+                    cin >> an_intent;
+                    cin.ignore(100, '\n');
+                    cout << "\nEnter comments: ";
+                    get_data(a_comment);
+
+                    //Respond to meeting
+                    result = to_respond->add_response(id_to_match, an_intent, a_comment);
+                    if (result == 2)
+                        cout << "*** Response added ***" << endl;
+                    
+                    else if (!result)
+                        cout << "*** Cannot add response! Email id provided does not match any participant for this meeting ***" << endl;
+
+                    else
+                        cout << "*** Cannot add response! Invalid intent code (Must be 0 (No), 1 (Maybe) or 2(Yes)) ***" << endl;
+                }
+
+                else
+                    cout << "*** Invalid S/N ***" << endl;
+            }
+
+            //Reset temporary 
+            to_respond = NULL;           
+            match = NULL;
+            an_intent = -1;
+            sn_torespond = 0;
+             
+            if (key_to_find)
+            {
+                delete [] key_to_find;
+                key_to_find = NULL;   
+            }
+            
+            if (a_comment)
+            {
+                delete [] a_comment;
+                a_comment = NULL;   
+            }
+
+            if (id_to_match)
+            {
+                delete [] id_to_match;
+                id_to_match = NULL;   
+            }
+
         }
     }
     while (menu_choice != 'f'); 

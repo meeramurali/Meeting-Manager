@@ -302,6 +302,7 @@ bool rb_node::is_equal(char * to_compare) const
 int rb_node::display(void) const
 {
     int num_meetings = 0;   //value to return 
+    int count = 0;
 
     //Display node color
     if (color == RED)
@@ -314,7 +315,7 @@ int rb_node::display(void) const
     cout << "***********************************************************************************************" << endl;
 
     //Display all meetings in list
-    num_meetings = display_all(head);
+    num_meetings = display_all(head, count);
 
     if (!num_meetings)
         cout << "\tNo meetings to display" << endl;
@@ -352,7 +353,7 @@ int rb_node::display_key(void) const
 //Displays all meeting nodes recursively
 //INPUT: head pointer to list of meetings
 //OUTPUT: int return type: number of meetings
-int rb_node::display_all(meeting_node * head) const
+int rb_node::display_all(meeting_node * head, int & count) const
 {
     int displayed = 0;
 
@@ -361,15 +362,17 @@ int rb_node::display_all(meeting_node * head) const
         return 0;
 
     //display current node
+    cout << "S/N: " << count + 1 << endl;
     if (head->display())
     {
         cout << endl;
         cout << "-----------------------------------------------------------------------------------------------" << endl;
         ++displayed;
+        ++count;
     }
  
     //recursive call
-    displayed += display_all(head->go_next());
+    displayed += display_all(head->go_next(), count);
 
     return displayed;
 }
@@ -436,6 +439,40 @@ int rb_node::add_meeting(meeting_node *& head, const meeting & to_add)
 }
 
 
+
+int rb_node::find_meeting_by_position(meeting_node *& found, int pos) const
+{
+    if (found != NULL)
+        return 0;
+
+    int timer = 0;
+
+    return find_meeting_by_position(head, found, pos, timer);
+}
+
+
+
+int rb_node::find_meeting_by_position(meeting_node * head, meeting_node *& found, int pos, int & timer) const
+{
+    int match_found = 0;
+
+    //base case
+    if (!head)
+        return 0;
+
+    ++timer;
+
+    if (timer == pos)
+    {
+        found = head;
+        match_found = 1;
+    }
+
+    else
+        match_found = find_meeting_by_position(head->go_next(), found, pos, timer);
+    
+    return match_found;
+}
 
 
 
@@ -789,6 +826,39 @@ int rb_tree::display_inorder(rb_node * root) const
 }
 
 
+
+//Displays all keywords in order - wrapper function
+//INPUT: no arguments
+//OUTPUT: int: number of keywords
+int rb_tree::display_key_inorder(void) const
+{
+    return display_key_inorder(root);
+}
+
+int rb_tree::display_key_inorder(rb_node * root) const
+{
+    int displayed = 0;
+    
+    //base case
+    if (!root)
+        return 0;
+
+    //traverse left subtree
+    displayed += display_key_inorder(root->go_left());
+
+    //display current node
+    root->display_key();
+    cout << endl;
+    ++displayed;
+
+    //traverse right subtree
+    displayed += display_key_inorder(root->go_right());
+    
+    return displayed;
+}
+
+
+
 //Finds height of tree
 int rb_tree::height(rb_node * root) const
 {
@@ -947,9 +1017,6 @@ int rb_tree::load_file(const char filename[])
         in_file.get(all_participants, 801, '|');
         in_file.ignore(1000, '|');
 
-        cout << "Participants string: ";
-        cout << all_participants << endl << endl;
-
         //Repeat until end of file or not connected to file
         while (in_file && !in_file.eof())
         {
@@ -970,16 +1037,9 @@ int rb_tree::load_file(const char filename[])
             meeting_grp = new grp_part;
             if (extract_participants (all_participants, *meeting_grp))
             {
-                //dipslay grp
-                cout << "\nGroup created: " << endl;
-                meeting_grp->display();
-
                 //create new meeting with read in details
                 new_meeting = new meeting(meeting_name, meeting_loc, meeting_date_time, meeting_key, *meeting_grp);
                 
-                cout << "\nMeeting created: " << endl;
-                new_meeting->display();
-
                 //Add meeting into tree
                 if (insert(* new_meeting))
                     //Increment number of meetings loaded
@@ -995,9 +1055,6 @@ int rb_tree::load_file(const char filename[])
             //Prime the pump for next read in
             in_file.get(all_participants, 801, '|');
             in_file.ignore(1000, '|');
-        
-            cout << "Participants string: ";
-            cout << all_participants << endl << endl;
         }
         
         //Close file and clear file variable
@@ -1042,7 +1099,6 @@ int rb_tree::extract_participants(char * all_participants, grp_part & a_grp)
             all_participants[index] != '[')
         {
             * dest = all_participants[index];
-            cout << all_participants[index];
             ++dest;
             ++index;
         }
@@ -1052,7 +1108,6 @@ int rb_tree::extract_participants(char * all_participants, grp_part & a_grp)
         {
             //terminate word with null character
             * dest = '\0';
-            cout << all_participants[index] << endl;
 
             //Increment index
             ++index;
@@ -1066,7 +1121,6 @@ int rb_tree::extract_participants(char * all_participants, grp_part & a_grp)
                  all_participants[index] != '^')
         {
             * dest = all_participants[index];
-            cout << all_participants[index] << endl;
             ++dest;
             ++index;
         }
@@ -1076,7 +1130,6 @@ int rb_tree::extract_participants(char * all_participants, grp_part & a_grp)
         {
             //terminate word with null character
             * dest = '\0';
-            cout << all_participants[index] << endl;
 
             //Increment index
             ++index;
@@ -1091,7 +1144,6 @@ int rb_tree::extract_participants(char * all_participants, grp_part & a_grp)
                  all_participants[index] != ';' &&
                  all_participants[index] != '\0')
         {
-            cout << all_participants[index] << endl;
             if (all_participants[index] == '0')
                 participant_intent = 0;
 
@@ -1116,7 +1168,6 @@ int rb_tree::extract_participants(char * all_participants, grp_part & a_grp)
                  all_participants[index] != '\0')
         {
             * dest = all_participants[index];
-            cout << all_participants[index] << endl;
             ++dest;
             ++index;
         }
@@ -1125,7 +1176,6 @@ int rb_tree::extract_participants(char * all_participants, grp_part & a_grp)
                  all_participants[index] == '\0')
         {
             //terminate word with null character
-            cout << all_participants[index];
             * dest = '\0';
             ++index;
             timer = 4;
@@ -1135,12 +1185,9 @@ int rb_tree::extract_participants(char * all_participants, grp_part & a_grp)
         {
             //Create a new contact 
             new_contact = new contact(participant_name, participant_email);
-            cout << "Contact created: " << endl;
-            new_contact->display();
             cout << endl;
            
             //Create a new participant
-            cout << "Participant created: " << endl;
             new_participant = new participant(*new_contact, participant_intent, participant_comment);
             cout << endl;
 
@@ -1161,4 +1208,40 @@ int rb_tree::extract_participants(char * all_participants, grp_part & a_grp)
     }
     
     return num_participants;
+}
+
+
+
+int rb_tree::find_by_keyword(rb_node *& found, char * a_key) const
+{
+    return find_by_key(found, root, a_key);
+}
+
+
+
+int rb_tree::find_by_key(rb_node *& found, rb_node * root, char * a_key) const
+{
+    int match_found = 0;
+
+    //base case
+    if(!root)
+        return 0; 
+
+    //If current node matches key, display all meetings 
+    //in node
+    if (root->is_equal(a_key))
+    {
+        found = root;
+        match_found = 1;
+    }
+
+    //If current key is lesser, traverse right subtree
+    else if (root->is_lesser(a_key))
+        match_found = find_by_key(found, root->go_right(), a_key);
+
+    //If current key is greater, traverse left subtree
+    else
+        match_found = find_by_key(found, root->go_left(), a_key);
+
+    return match_found;
 }

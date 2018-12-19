@@ -62,6 +62,7 @@ class rb_node
         int set_color(int new_color);
         int get_color(void) const;
         int add_meeting(const meeting & to_add);
+        int find_meeting_by_position(meeting_node *& found, int pos) const;
         
     private:
         char * key;
@@ -71,9 +72,10 @@ class rb_node
         rb_node * right;
         rb_node * parent;
 
-        int display_all(meeting_node * head) const;
+        int display_all(meeting_node * head, int & count) const;
         int add_meeting(meeting_node *& head, const meeting & to_add);
         int remove_all(meeting_node *& head);
+        int find_meeting_by_position(meeting_node * head, meeting_node *& found, int pos, int & timer) const;
 };
 
 
@@ -88,8 +90,10 @@ class rb_tree
         int height(rb_node * root) const;
         int insert(const meeting & to_add);
         int display_inorder(void) const;
+        int display_key_inorder(void) const;
         int display_key_bylevels(void) const;
         int display_by_keyword(char * a_key) const;
+        int find_by_keyword(rb_node *& found, char * a_key) const;
 //        rb_node& operator [] (char * a_key);
 
     private:
@@ -105,4 +109,6 @@ class rb_tree
         int display_inorder(rb_node * root) const;
         int display_lvl(rb_node * root, int lvl) const;
         int display_by_key(rb_node * root, char * a_key) const;
+        int find_by_key(rb_node *& found, rb_node * root, char * a_key) const;
+        int display_key_inorder(rb_node * root) const;
 };
